@@ -7,6 +7,7 @@
 # Este programa fará a instalação das configurações para uso no nvim                               #
 # Version: 1 Versão inicial                                                                        #
 # Version: 2 -> Implementação do download do gerenciado de plugins Vunddle					       #
+# Version: 3 -> Correção de bugs e suporte a atualização das versões mais recentes                 #
 #																								   #
 ####################################################################################################
 
@@ -34,31 +35,41 @@ case "$1" in
 		;;
 esac
 
+# Clona um repositório ou atualiza para a versão mais recente se já existir
+git_install_or_update() {
+    local repo="$1"
+    local dir="$2"
+    local extra_flags="${3:-}"
+    if [ -d "$dir/.git" ]; then
+        echo "Atualizando $(basename $dir)..."
+        git -C "$dir" pull
+    else
+        git clone $extra_flags "$repo" "$dir"
+    fi
+}
+
 echo -e "Atualizando o sistema"
 sudo apt update && sudo apt upgrade -y
-sudo apt install powerline fonts-powerline -y
+sudo apt install powerline fonts-powerline uuid-runtime zsh wget git fonts-powerline -y
 
-echo -e "Instalando uuid-runtime"
-sudo apt-get install uuid-runtime -y 
-
-if [ ! -d ~/.vim/plugged ];
-then
-	curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+# vim-plug: sempre baixa a versão mais recente
+echo "Instalando/atualizando vim-plug..."
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-fi
 
-if [ ! -d ~/.config/nvim ];
-then
-	sudo apt-get install -y neovim
-	mkdir -p ~/.config/nvim
+# neovim
+if [ ! -d ~/.config/nvim ]; then
+    sudo apt-get install -y neovim
+    mkdir -p ~/.config/nvim
+else
+    sudo apt-get install -y --only-upgrade neovim 2>/dev/null || true
 fi
 
 rm -rf ~/.config/nvim/init.vim
-ln -s ~/.myvimrc/.vimrc ~/.config/nvim/init.vim 
+ln -s ~/.myvimrc/.vimrc ~/.config/nvim/init.vim
 
 echo -e "Configuração NVIM realizada com sucesso. Agora abra o seu NVIM e digite no modo normal \033[01;32m:PlugInstall\033[01;37!"
 
-	
 rm -rf ~/.vimrc
 ln -s ~/.myvimrc/.vimrc ~/.vimrc
 
@@ -68,41 +79,41 @@ echo -e "Configuração VIM realizada com sucesso.
 rm -rf ~/.ideavimrc
 ln -s ~/.myvimrc/.ideavimrc ~/.ideavimrc
 
-echo -e "Configuração IDEAVIM realizada com sucesso." 
+echo -e "Configuração IDEAVIM realizada com sucesso."
 
-if [ ! -d ~/.fzf ]; then
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-    ~/.fzf/install
-fi
+# fzf
+git_install_or_update https://github.com/junegunn/fzf.git ~/.fzf "--depth 1"
+~/.fzf/install --all --no-update-rc
+echo "Configuração FZF realizada com sucesso."
 
-echo  "Configuração FZF realizada com sucesso." 
-
-#sudo apt install zsh -y
-sudo apt install zsh wget git fonts-powerline -y
+# oh-my-zsh
 if [ ! -d ~/.oh-my-zsh ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+else
+    echo "Atualizando oh-my-zsh..."
+    git -C ~/.oh-my-zsh pull
 fi
 
 rm -rf ~/.zshrc
-ln -s ~/.myvimrc/.zshrc ~/.zshrc 
+ln -s ~/.myvimrc/.zshrc ~/.zshrc
 
-echo -e "Configuração ZSH realizada com sucesso." 
+echo -e "Configuração ZSH realizada com sucesso."
 
-if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-fi
+# zsh plugins
+git_install_or_update \
+    https://github.com/zsh-users/zsh-autosuggestions \
+    "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
 echo "ZSH: Plugin AutoComplete"
 
-if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-fi
+git_install_or_update \
+    https://github.com/zsh-users/zsh-syntax-highlighting.git \
+    "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
 echo "ZSH: Plugin Hilight"
 
+# tmux
 rm -rf ~/.tmux.conf
 ln -s ~/.myvimrc/.tmux.conf ~/.tmux.conf
-if [ ! -d ~/.tmux/plugins/tpm ]; then
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-fi
+git_install_or_update https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 tmux source ~/.tmux.conf 2>/dev/null || true
 
-echo -e "Configuração do TMUX executada com sucesso." 
+echo -e "Configuração do TMUX executada com sucesso."
