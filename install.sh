@@ -54,45 +54,55 @@ then
 fi
 
 rm -rf ~/.config/nvim/init.vim
-ln -S ~/.config/nvim/init.vim ~/.myvimrc/.vimrc
+ln -s ~/.myvimrc/.vimrc ~/.config/nvim/init.vim 
 
 echo -e "Configuração NVIM realizada com sucesso. Agora abra o seu NVIM e digite no modo normal \033[01;32m:PlugInstall\033[01;37!"
 
 	
 rm -rf ~/.vimrc
-ln -S ~/.vimrc ~/.myvimrc/.vimrc
+ln -s ~/.myvimrc/.vimrc ~/.vimrc
 
 echo -e "Configuração VIM realizada com sucesso.
 	Agora abra o seu VIM e digite no modo normal \033[01;32m:PlugInstall\033[01;37!"
 
-rm -rf ~/.ideavim
-ln -S ~/.ideavim ~/.myvimrc/.ideavim
+rm -rf ~/.ideavimrc
+ln -s ~/.myvimrc/.ideavimrc ~/.ideavimrc
 
 echo -e "Configuração IDEAVIM realizada com sucesso." 
 
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
+if [ ! -d ~/.fzf ]; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    ~/.fzf/install
+fi
 
 echo  "Configuração FZF realizada com sucesso." 
 
 #sudo apt install zsh -y
 sudo apt install zsh wget git fonts-powerline -y
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+if [ ! -d ~/.oh-my-zsh ]; then
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 rm -rf ~/.zshrc
-ln -S ~/.zshrc ~/.myvimrc/.zshrc
+ln -s ~/.myvimrc/.zshrc ~/.zshrc 
 
 echo -e "Configuração ZSH realizada com sucesso." 
 
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+fi
 echo "ZSH: Plugin AutoComplete"
 
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+if [ ! -d "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+fi
 echo "ZSH: Plugin Hilight"
 
 rm -rf ~/.tmux.conf
-ln -S ~/.tmux.conf ~/.myvimrc/.tmux.conf
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-tmux source ~/.tmux.conf
+ln -s ~/.myvimrc/.tmux.conf ~/.tmux.conf
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+tmux source ~/.tmux.conf 2>/dev/null || true
 
 echo -e "Configuração do TMUX executada com sucesso." 

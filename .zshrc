@@ -104,7 +104,11 @@ alias cb="xclip -selection clipboard"
 alias vi="nvim"
 alias vimrc="vi ~/.vimrc"
 alias sintegraws_saldo="php -f ~/Documents/consulta-saldo-sintegraws.php"
-alias saldo_btc="php -f ~/Documents/saldo_btc.php"
+alias btc="php ~/Documents/valor_btc.php"
+alias sol="php ~/Documents/solana.php"
+alias tmux-save='~/.tmux/plugins/tmux-resurrect/scripts/save.sh'
+alias tmux-restore='~/.tmux/plugins/tmux-resurrect/scripts/restore.sh'
+alias aug=auggie
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh 
 
@@ -114,3 +118,18 @@ alias saldo_btc="php -f ~/Documents/saldo_btc.php"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+eval "$(ssh-agent -s 2>/dev/null)" > /dev/null
+ssh-add ~/.ssh/id_rsa > /dev/null 2>&1
+
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+export M2_HOME=/opt/apache-maven-3.6.3
+export PATH=${M2_HOME}/bin:${PATH}
+cal='ncal'
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
